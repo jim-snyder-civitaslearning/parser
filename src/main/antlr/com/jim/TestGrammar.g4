@@ -13,24 +13,12 @@ import java.util.*;
 }
 
 @lexer::members {
-    // this is not thread safe
-    public static boolean lexerMode = true;
-
-    Map<String,Integer> keywords = new HashMap<String,Integer>() {{
-    	put("A", TestGrammarParser.A_KW);
-    	put("B", TestGrammarParser.B_KW);
-    	put("C", TestGrammarParser.C_KW);
-    }};
-
-    protected String getUnquotedString(String original) {
-        return original.substring(1, original.length() - 1);
-    }
+    public static LexerUtils lexerUtils = new LexerUtils();
 }
 
 @parser::members {
-
     public boolean setLexerMode(boolean on) {
-        TestGrammarLexer.lexerMode = on;
+        TestGrammarLexer.lexerUtils.lexerMode = on;
         return true;
     }
 }
@@ -42,7 +30,7 @@ start : items EOF;
 items: item (',' item)*;
 
 item :
-    { setLexerMode(false) }? A_KW  ':'  symbol { setLexerMode(true);}
+    { setLexerMode(false) }? A_KW  ':'  { setLexerMode(true);} symbol
 ;
 
 symbol :  QSTRING_ID;
@@ -50,15 +38,13 @@ symbol :  QSTRING_ID;
 // Things to skip over
 WHITE_SPACE : [ \t\r\n]+ ->  skip;
 
-KEY_WORD : '"' [a-zA-Z0-9]* '"' { lexerMode }? {
-    String id = getUnquotedString(getText());
-    setType(keywords.get(id));
+KEY_WORD : '"' [a-zA-Z0-9]* '"' { lexerUtils.lexerMode }? {
+    String id = lexerUtils.getKeywordOrId(this);
     System.out.printf("found string of '%s' of kind %s %n", id, TestGrammarParser.VOCABULARY.getDisplayName(getType()));
 };
 
-QSTRING_ID : '"' [a-zA-Z0-9]* '"' { !lexerMode }? {
-    String id = getUnquotedString(getText());
-    setType(QSTRING_ID);
+QSTRING_ID : '"' [a-zA-Z0-9]* '"' { !lexerUtils.lexerMode }? {
+    String id = lexerUtils.getId(this);
     System.out.printf("found string of '%s' of kind %s %n", id, TestGrammarParser.VOCABULARY.getDisplayName(getType()));
 }
 
