@@ -28,8 +28,9 @@ import java.util.*;
 
 @parser::members {
 
-    public void setLexerMode(boolean on) {
+    public boolean setLexerMode(boolean on) {
         TestGrammarLexer.lexerMode = on;
+        return true;
     }
 }
 
@@ -40,7 +41,7 @@ start : items EOF;
 items: item (',' item)*;
 
 item :
-    A_KW { setLexerMode(false); } ':'  symbol { setLexerMode(true);}
+    A_KW  { setLexerMode(false) }? ':'  symbol { setLexerMode(true);}
 ;
 
 symbol
@@ -50,15 +51,16 @@ symbol
 // Things to skip over
 WHITE_SPACE : [ \t\r\n]+ ->  skip;
 
-QSTRING_ID : '"' [a-zA-Z0-9]* '"' {
+KEY_WORD : '"' [a-zA-Z0-9]* '"' { lexerMode }? {
     String id = getUnquotedString(getText());
+    setType(keywords.get(id));
+    System.out.printf("found string of '%s' of kind %s %n", id, TestGrammarParser.VOCABULARY.getDisplayName(getType()));
+};
 
-    if ( lexerMode == true && keywords.containsKey(id) ) {
-        setType(keywords.get(id));
-    } else {
-        setType(QSTRING_ID);
-    }
-    System.out.printf("found string of \"%s\" of kind %s %n", id, TestGrammarParser.VOCABULARY.getDisplayName(getType()));
+QSTRING_ID : '"' [a-zA-Z0-9]* '"' { !lexerMode }? {
+    String id = getUnquotedString(getText());
+    setType(QSTRING_ID);
+    System.out.printf("found string of '%s' of kind %s %n", id, TestGrammarParser.VOCABULARY.getDisplayName(getType()));
 }
 
 ;
