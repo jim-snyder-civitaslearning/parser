@@ -7,7 +7,11 @@ import java.util.Map;
 
 public class LexerUtils {
   // this is not thread safe
-  public static boolean lexerMode = true;
+  public ThreadLocal<Boolean> lexerMode = new ThreadLocal<>();
+
+  public LexerUtils() {
+    lexerMode.set(Boolean.TRUE);
+  }
 
   public Map<String, Integer> keywords = new HashMap<String, Integer>() {{
     put("A", TestGrammarParser.A_KW);
