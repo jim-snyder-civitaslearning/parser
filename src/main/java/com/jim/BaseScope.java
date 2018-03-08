@@ -29,4 +29,5 @@ public abstract class BaseScope implements Scope, SymbolTableEntry {
   public void define(SymbolTableEntry s) {
     symbols.put(s.getSymbolName(), s);
   }
+
 }

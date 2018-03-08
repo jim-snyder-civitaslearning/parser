@@ -1,18 +1,14 @@
 package com.jim;
 
-public abstract class Symbol implements SymbolTableEntry {
+public abstract class Symbol {
 
-  private Symbol() {
-
-  }
   private String name;
 
   public Symbol(String name) {
     this.name = name;
   }
 
-  @Override
-  public String getSymbolName() {
+  public String getName() {
     return name;
   }
 }
