@@ -13,6 +13,7 @@ import java.util.*;
 }
 
 @lexer::members {
+    // this is not thread safe
     public static boolean lexerMode = true;
 
     Map<String,Integer> keywords = new HashMap<String,Integer>() {{
@@ -41,12 +42,10 @@ start : items EOF;
 items: item (',' item)*;
 
 item :
-    A_KW  { setLexerMode(false) }? ':'  symbol { setLexerMode(true);}
+    { setLexerMode(false) }? A_KW  ':'  symbol { setLexerMode(true);}
 ;
 
-symbol
-    :  QSTRING_ID
-;
+symbol :  QSTRING_ID;
 
 // Things to skip over
 WHITE_SPACE : [ \t\r\n]+ ->  skip;
